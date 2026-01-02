@@ -3,189 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Sender</title>
+    <title>Gomail - Send Email</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-            --error-color: #e74c3c;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --error: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
         }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 24px;
         }
+        
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        h2 {
+        
+        .header {
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
         }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+        
+        .status-ok {
+            background: #dcfce7;
+            color: var(--success);
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #dcfce7;
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+        
+        .alert-error {
+            background: #fef2f2;
+            color: var(--error);
+            border: 1px solid #fecaca;
+        }
+        
+        .mail-type {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .mail-type input { display: none; }
+        
+        .mail-type label {
+            display: block;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .mail-type label:hover {
+            border-color: var(--primary);
+        }
+        
+        .mail-type input:checked + label {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+        
+        .form-label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="file"], textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-        .radio-group {
-            display: flex;
-            gap: 15px;
-        }
-        .radio-group label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .radio-group input[type="radio"] {
-            margin-right: 5px;
-        }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-        .error {
-            color: var(--error-color);
             font-size: 14px;
-            margin-top: 5px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
         }
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
+        
+        .form-label .required {
+            color: var(--error);
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .file-input {
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+        
+        .file-input:hover {
+            border-color: var(--primary);
+        }
+        
+        .file-input input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-input-text {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .file-name {
+            font-size: 12px;
+            color: var(--primary);
+            margin-top: 8px;
+        }
+        
+        .toggle-link {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .toggle-link button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        
+        .toggle-link button:hover {
+            text-decoration: underline;
+        }
+        
+        .hidden { display: none; }
+        
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .footer {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            margin: 0 12px;
+        }
+        
+        .footer a:hover {
+            color: var(--primary);
+        }
+        
+        .error-text {
+            color: var(--error);
+            font-size: 12px;
+            margin-top: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Gomail</h2>
-        <form id="emailForm" action="/send" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>Email Type:</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="mailType" value="html" required> HTML Mail</label>
-                    <label><input type="radio" name="mailType" value="normal"> Normal Mail</label>
+        <div class="card">
+            <div class="header">
+                <div class="logo">Gomail</div>
+                <div class="subtitle">Professional Email Utility</div>
+                {{if .IsConfigured}}
+                <div class="status status-ok">Ready - {{.FromEmail}}</div>
+                {{else}}
+                <a href="/admin" class="status status-warning">Configure credentials</a>
+                {{end}}
+            </div>
+            
+            <div id="successAlert" class="alert alert-success hidden">
+                Email sent successfully.
+            </div>
+            
+            <div id="errorAlert" class="alert alert-error hidden">
+                Failed to send email. Please try again.
+            </div>
+            
+            <form id="emailForm" action="/send" method="POST" enctype="multipart/form-data">
+                <div class="mail-type">
+                    <div>
+                        <input type="radio" name="mailType" id="plainMail" value="normal" checked>
+                        <label for="plainMail">Plain Text</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="mailType" id="htmlMail" value="html">
+                        <label for="htmlMail">HTML Template</label>
+                    </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label">To <span class="required">*</span></label>
+                    <input type="text" name="to" placeholder="recipient@example.com" required>
+                    <div class="error-text" id="toError"></div>
+                </div>
+                
+                <div class="toggle-link">
+                    <button type="button" onclick="toggleCcBcc()">+ Add CC/BCC</button>
+                </div>
+                
+                <div id="ccBccFields" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">CC</label>
+                        <input type="text" name="cc" placeholder="cc@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">BCC</label>
+                        <input type="text" name="bcc" placeholder="bcc@example.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Subject <span class="required">*</span></label>
+                    <input type="text" name="subject" placeholder="Email subject" required>
+                </div>
+                
+                <div class="form-group" id="messageSection">
+                    <label class="form-label">Message</label>
+                    <textarea name="message" placeholder="Type your message here..."></textarea>
+                </div>
+                
+                <div class="form-group hidden" id="htmlSection">
+                    <label class="form-label">HTML Template</label>
+                    <div class="file-input">
+                        <input type="file" id="htmlFile" name="htmlFile" accept=".html,.htm">
+                        <div class="file-input-text">Choose HTML file or drag here</div>
+                    </div>
+                    <div class="file-name" id="htmlFileName"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Attachments</label>
+                    <div class="file-input">
+                        <input type="file" id="attachments" name="attachments" multiple>
+                        <div class="file-input-text">Add attachments</div>
+                    </div>
+                    <div class="file-name" id="attachmentNames"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" {{if not .IsConfigured}}disabled{{end}}>
+                    Send Email
+                </button>
+            </form>
+            
+            <div class="footer">
+                <a href="/admin">Settings</a>
+                <a href="https://github.com/pranavKharche24/mail" target="_blank">Documentation</a>
             </div>
-
-            <div class="form-group">
-                <label for="to">To (comma-separated emails):</label>
-                <input type="text" id="to" name="to" required>
-                <div class="error" id="toError"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="cc">CC (comma-separated emails):</label>
-                <input type="text" id="cc" name="cc">
-                <div class="error" id="ccError"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="bcc">BCC (comma-separated emails):</label>
-                <input type="text" id="bcc" name="bcc">
-                <div class="error" id="bccError"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="subject">Subject:</label>
-                <input type="text" id="subject" name="subject" required>
-            </div>
-
-            <div class="form-group">
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" rows="5"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="htmlFile">HTML File (for HTML mail):</label>
-                <input type="file" id="htmlFile" name="htmlFile">
-            </div>
-
-            <div class="form-group">
-                <label for="attachments">Attachments:</label>
-                <input type="file" id="attachments" name="attachments" multiple>
-            </div>
-
-            <button type="submit">Send Email</button>
-        </form>
+        </div>
     </div>
-
+    
     <script>
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
-            let isValid = true;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            function validateEmails(fieldId) {
-                const field = document.getElementById(fieldId);
-                const errorElement = document.getElementById(fieldId + 'Error');
-                if (field.value) {
-                    const emails = field.value.split(',').map(email => email.trim());
-                    const invalidEmails = emails.filter(email => !emailRegex.test(email));
-                    if (invalidEmails.length > 0) {
-                        errorElement.textContent = `Invalid email(s): ${invalidEmails.join(', ')}`;
-                        isValid = false;
-                    } else {
-                        errorElement.textContent = '';
-                    }
-                } else {
-                    errorElement.textContent = '';
-                }
-            }
-
-            validateEmails('to');
-            validateEmails('cc');
-            validateEmails('bcc');
-
-            if (!isValid) {
-                e.preventDefault();
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            document.getElementById('successAlert').classList.remove('hidden');
+        }
+        if (urlParams.get('error') === 'send') {
+            document.getElementById('errorAlert').classList.remove('hidden');
+        }
+        
+        document.querySelectorAll('input[name="mailType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('htmlSection').classList.toggle('hidden', this.value !== 'html');
+                document.getElementById('messageSection').classList.toggle('hidden', this.value === 'html');
+            });
         });
-
-        // Add animation to form fields
-        const inputs = document.querySelectorAll('input[type="text"], textarea');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.transition = 'transform 0.3s ease';
-            });
-            input.addEventListener('blur', function() {
-                this.style.transform = 'translateY(0)';
-            });
+        
+        function toggleCcBcc() {
+            document.getElementById('ccBccFields').classList.toggle('hidden');
+        }
+        
+        document.getElementById('htmlFile').addEventListener('change', function() {
+            document.getElementById('htmlFileName').textContent = this.files[0]?.name || '';
+        });
+        
+        document.getElementById('attachments').addEventListener('change', function() {
+            document.getElementById('attachmentNames').textContent = 
+                Array.from(this.files).map(f => f.name).join(', ');
+        });
+        
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const toInput = document.querySelector('input[name="to"]');
+            const toError = document.getElementById('toError');
+            
+            const emails = toInput.value.split(',').map(e => e.trim()).filter(e => e);
+            const invalid = emails.filter(e => !emailRegex.test(e));
+            
+            if (invalid.length > 0) {
+                e.preventDefault();
+                toError.textContent = 'Invalid: ' + invalid.join(', ');
+            } else {
+                toError.textContent = '';
+            }
         });
     </script>
 </body>

@@ -3,103 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Gomail - Settings</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-            --error-color: #e74c3c;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --error: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
         }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 24px;
         }
+        
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
+            max-width: 480px;
+            margin: 40px auto;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        h2 {
+        
+        .header {
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+        
+        .status-ok {
+            background: #dcfce7;
+            color: var(--success);
+        }
+        
+        .status-warning {
+            background: #fef2f2;
+            color: var(--error);
+        }
+        
+        .info-box {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        
+        .info-box p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+        
+        .info-box a {
+            color: var(--primary);
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+        
+        .form-label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
         }
-        input[type="text"], input[type="password"] {
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: var(--primary-color);
+        
+        input:focus {
             outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
+        
+        .password-wrapper {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
             border: none;
-            border-radius: 4px;
+            color: var(--text-muted);
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            font-size: 12px;
+        }
+        
+        .password-toggle:hover {
+            color: var(--text);
+        }
+        
+        .btn {
             width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
         }
-        button:hover {
-            background-color: var(--secondary-color);
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
-        .back-link {
-            display: block;
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .footer {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
             text-align: center;
-            margin-top: 20px;
-            color: var(--primary-color);
+        }
+        
+        .footer a {
+            color: var(--text-muted);
             text-decoration: none;
-            font-weight: bold;
+            font-size: 13px;
+            margin: 0 12px;
         }
-        .back-link:hover {
-            color: var(--secondary-color);
-        }
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
+        
+        .footer a:hover {
+            color: var(--primary);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Admin Panel</h2>
-        <form action="/admin/save" method="POST">
-            <div class="form-group">
-                <label for="fromEmail">From Email:</label>
-                <input type="text" id="fromEmail" name="fromEmail" value="{{.FromEmail}}" required>
+        <div class="card">
+            <div class="header">
+                <div class="logo">Settings</div>
+                <div class="subtitle">Configure email credentials</div>
+                {{if .IsConfigured}}
+                <div class="status status-ok">Configured</div>
+                {{else}}
+                <div class="status status-warning">Not Configured</div>
+                {{end}}
             </div>
-            <div class="form-group">
-                <label for="fromPass">SMTP/App Password:</label>
-                <input type="password" id="fromPass" name="fromPass" value="{{.FromPass}}" required>
+            
+            <div class="info-box">
+                <strong>Gmail App Password Required</strong>
+                <p>
+                    Gmail requires an App Password for third-party apps.
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank">Generate one here</a>
+                    (2-Step Verification must be enabled).
+                </p>
             </div>
-            <button type="submit">Save</button>
-        </form>
-        <a href="/" class="back-link">Back to Home</a>
+            
+            <form action="/admin/save" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Gmail Address</label>
+                    <input 
+                        type="email" 
+                        name="fromEmail" 
+                        value="{{.FromEmail}}" 
+                        placeholder="your-email@gmail.com"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">App Password</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="fromPass"
+                            name="fromPass" 
+                            value="{{.FromPass}}" 
+                            placeholder="16-character app password"
+                            required
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            Show
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Save Credentials</button>
+                <a href="/" class="btn btn-secondary" style="display: block; text-align: center; text-decoration: none;">
+                    Back to Email Form
+                </a>
+            </form>
+            
+            <div class="footer">
+                <a href="/">Send Email</a>
+                <a href="https://github.com/pranavKharche24/mail" target="_blank">Documentation</a>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('fromPass');
+            const btn = document.querySelector('.password-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+    </script>
 </body>
 </html>
