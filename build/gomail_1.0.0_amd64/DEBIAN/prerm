@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+echo "Removing Gomail..."
+exit 0

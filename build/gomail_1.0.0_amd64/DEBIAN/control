@@ -1,0 +1,12 @@
+Package: gomail
+Version: 1.0.0
+Section: mail
+Priority: optional
+Architecture: amd64
+Maintainer: Pranav Kharche <pranavkharche24@gmail.com>
+Description: Professional Email Utility - CLI and Web interface for sending emails via Gmail
+ Gomail is a professional email utility for sending emails via Gmail SMTP.
+ Features include CLI and Web interfaces, HTML email support, and attachments.
+ .
+ No external dependencies required.
+Homepage: https://github.com/pranavKharche24/mail

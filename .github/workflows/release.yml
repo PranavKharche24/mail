@@ -1,0 +1,193 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+
+    - name: Get version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Build Linux AMD64 binary
+      run: |
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o gomail-linux-amd64 .
+
+    - name: Build Linux ARM64 binary
+      run: |
+        CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o gomail-linux-arm64 .
+
+    - name: Build macOS AMD64 binary
+      run: |
+        CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o gomail-darwin-amd64 .
+
+    - name: Build macOS ARM64 binary
+      run: |
+        CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o gomail-darwin-arm64 .
+
+    - name: Build Windows AMD64 binary
+      run: |
+        CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.version=${{ steps.version.outputs.VERSION }}" -o gomail-windows-amd64.exe .
+
+    - name: Build .deb package
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        PACKAGE_NAME="gomail"
+        ARCH="amd64"
+        DEB_DIR="gomail_${VERSION}_${ARCH}"
+        
+        mkdir -p ${DEB_DIR}/DEBIAN
+        mkdir -p ${DEB_DIR}/usr/bin
+        mkdir -p ${DEB_DIR}/usr/share/gomail/templates
+        mkdir -p ${DEB_DIR}/usr/share/doc/gomail
+        mkdir -p ${DEB_DIR}/etc/gomail
+        
+        cp gomail-linux-amd64 ${DEB_DIR}/usr/bin/gomail
+        chmod 755 ${DEB_DIR}/usr/bin/gomail
+        
+        cp templates/*.html ${DEB_DIR}/usr/share/gomail/templates/
+        cp README.md ${DEB_DIR}/usr/share/doc/gomail/
+        cp .env.example ${DEB_DIR}/etc/gomail/gomail.env.example
+        
+        cat > ${DEB_DIR}/DEBIAN/control << EOF
+        Package: ${PACKAGE_NAME}
+        Version: ${VERSION}
+        Section: mail
+        Priority: optional
+        Architecture: ${ARCH}
+        Maintainer: Pranav Kharche <pranavkharche24@gmail.com>
+        Description: Professional Email Utility
+         Gomail - CLI and Web interface for sending emails via Gmail SMTP.
+        Homepage: https://github.com/pranavKharche24/mail
+        EOF
+        
+        cat > ${DEB_DIR}/DEBIAN/postinst << 'POSTINST'
+        #!/bin/bash
+        echo "Gomail installed successfully!"
+        echo "Run 'gomail help' for usage information."
+        exit 0
+        POSTINST
+        chmod 755 ${DEB_DIR}/DEBIAN/postinst
+        
+        dpkg-deb --build ${DEB_DIR}
+        mv ${DEB_DIR}.deb gomail_${VERSION}_amd64.deb
+
+    - name: Create tarballs
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        
+        # Linux AMD64
+        mkdir -p gomail-${VERSION}-linux-amd64
+        cp gomail-linux-amd64 gomail-${VERSION}-linux-amd64/gomail
+        cp -r templates gomail-${VERSION}-linux-amd64/
+        cp .env.example gomail-${VERSION}-linux-amd64/
+        cp README.md gomail-${VERSION}-linux-amd64/
+        tar -czvf gomail-${VERSION}-linux-amd64.tar.gz gomail-${VERSION}-linux-amd64
+        
+        # Linux ARM64
+        mkdir -p gomail-${VERSION}-linux-arm64
+        cp gomail-linux-arm64 gomail-${VERSION}-linux-arm64/gomail
+        cp -r templates gomail-${VERSION}-linux-arm64/
+        cp .env.example gomail-${VERSION}-linux-arm64/
+        cp README.md gomail-${VERSION}-linux-arm64/
+        tar -czvf gomail-${VERSION}-linux-arm64.tar.gz gomail-${VERSION}-linux-arm64
+        
+        # macOS AMD64
+        mkdir -p gomail-${VERSION}-darwin-amd64
+        cp gomail-darwin-amd64 gomail-${VERSION}-darwin-amd64/gomail
+        cp -r templates gomail-${VERSION}-darwin-amd64/
+        cp .env.example gomail-${VERSION}-darwin-amd64/
+        cp README.md gomail-${VERSION}-darwin-amd64/
+        tar -czvf gomail-${VERSION}-darwin-amd64.tar.gz gomail-${VERSION}-darwin-amd64
+        
+        # macOS ARM64
+        mkdir -p gomail-${VERSION}-darwin-arm64
+        cp gomail-darwin-arm64 gomail-${VERSION}-darwin-arm64/gomail
+        cp -r templates gomail-${VERSION}-darwin-arm64/
+        cp .env.example gomail-${VERSION}-darwin-arm64/
+        cp README.md gomail-${VERSION}-darwin-arm64/
+        tar -czvf gomail-${VERSION}-darwin-arm64.tar.gz gomail-${VERSION}-darwin-arm64
+        
+        # Windows AMD64
+        mkdir -p gomail-${VERSION}-windows-amd64
+        cp gomail-windows-amd64.exe gomail-${VERSION}-windows-amd64/gomail.exe
+        cp -r templates gomail-${VERSION}-windows-amd64/
+        cp .env.example gomail-${VERSION}-windows-amd64/
+        cp README.md gomail-${VERSION}-windows-amd64/
+        zip -r gomail-${VERSION}-windows-amd64.zip gomail-${VERSION}-windows-amd64
+
+    - name: Generate checksums
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        sha256sum gomail-${VERSION}-*.tar.gz gomail-${VERSION}-*.zip gomail_${VERSION}_amd64.deb > checksums.txt
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Gomail v${{ steps.version.outputs.VERSION }}
+        body: |
+          ## Gomail v${{ steps.version.outputs.VERSION }}
+          
+          Professional Email Utility with CLI and Web interface.
+          
+          ### Installation
+          
+          **Debian/Ubuntu (.deb)**
+          ```bash
+          sudo dpkg -i gomail_${{ steps.version.outputs.VERSION }}_amd64.deb
+          ```
+          
+          **Linux (binary)**
+          ```bash
+          tar -xzf gomail-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+          cd gomail-${{ steps.version.outputs.VERSION }}-linux-amd64
+          ./gomail
+          ```
+          
+          **macOS**
+          ```bash
+          tar -xzf gomail-${{ steps.version.outputs.VERSION }}-darwin-amd64.tar.gz
+          cd gomail-${{ steps.version.outputs.VERSION }}-darwin-amd64
+          ./gomail
+          ```
+          
+          **Windows**
+          Extract the zip and run `gomail.exe`
+          
+          ### Configuration
+          
+          Edit `.env` or `~/.config/gomail/.env`:
+          ```
+          EMAIL_FROM=your-email@gmail.com
+          EMAIL_PASSWORD=your-app-password
+          PORT=8080
+          ```
+          
+          Get Gmail App Password: https://myaccount.google.com/apppasswords
+          
+        files: |
+          gomail_${{ steps.version.outputs.VERSION }}_amd64.deb
+          gomail-${{ steps.version.outputs.VERSION }}-linux-amd64.tar.gz
+          gomail-${{ steps.version.outputs.VERSION }}-linux-arm64.tar.gz
+          gomail-${{ steps.version.outputs.VERSION }}-darwin-amd64.tar.gz
+          gomail-${{ steps.version.outputs.VERSION }}-darwin-arm64.tar.gz
+          gomail-${{ steps.version.outputs.VERSION }}-windows-amd64.zip
+          checksums.txt
+        draft: false
+        prerelease: false

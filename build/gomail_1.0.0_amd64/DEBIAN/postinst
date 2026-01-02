@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+# Create gomail config directory in user home if running as regular user
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    mkdir -p "$USER_HOME/.config/gomail"
+    mkdir -p "$USER_HOME/.config/gomail/templates"
+    mkdir -p "$USER_HOME/.config/gomail/uploads"
+    
+    # Copy templates
+    cp -n /usr/share/gomail/templates/*.html "$USER_HOME/.config/gomail/templates/" 2>/dev/null || true
+    
+    # Copy example env if not exists
+    if [ ! -f "$USER_HOME/.config/gomail/.env" ]; then
+        cp /etc/gomail/gomail.env.example "$USER_HOME/.config/gomail/.env"
+    fi
+    
+    # Set ownership
+    chown -R "$SUDO_USER:$SUDO_USER" "$USER_HOME/.config/gomail"
+fi
+
+echo ""
+echo "Gomail installed successfully!"
+echo ""
+echo "Quick start:"
+echo "  1. Configure credentials: nano ~/.config/gomail/.env"
+echo "  2. Run: gomail"
+echo ""
+echo "Usage:"
+echo "  gomail          - Start both CLI and Web interface"
+echo "  gomail cli      - CLI mode only"
+echo "  gomail web      - Web mode only"
+echo "  gomail help     - Show help"
+echo ""
+
+exit 0
